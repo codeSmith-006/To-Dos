@@ -1,8 +1,15 @@
 import React, { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Tooltip } from "react-tooltip";
+import "react-tooltip/dist/react-tooltip.css";
+import { CheckCheck } from "lucide-react";
+import { Square, CheckSquare } from "lucide-react";
 
 const Main = () => {
   // State for view toggle
   const [isTableView, setIsTableView] = useState(true);
+
+  const [isFinished, setIsFinished] = useState(false);
 
   // Show/hide search input
   const [showSearch, setShowSearch] = useState(false);
@@ -39,6 +46,10 @@ const Main = () => {
     setShowModal(false);
   };
 
+  // handle edit
+  const handleEdit = () => {
+    console.log("Edit");
+  };
 
   return (
     <div className="bg-[#191919] text-[#D4D4D4] min-h-screen px-4 py-6">
@@ -67,10 +78,35 @@ const Main = () => {
 
           {/* Right: Sort + Search */}
           <div className="flex items-center gap-3">
-            <button className="text-sm border border-[#838383] px-2 py-1 rounded">
-              Sort by Date
-            </button>
-            <div className="relative">
+            <>
+              <button
+                data-tooltip-id="sort-tooltip"
+                className="border border-[#838383] p-1 rounded hover:text-[#D4D4D4] text-[#838383]"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="w-5 h-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 9l6-6 6 6M18 15l-6 6-6-6"
+                  />
+                </svg>
+              </button>
+
+              <Tooltip
+                id="sort-tooltip"
+                place="bottom"
+                content="Sort"
+                className="z-50"
+              />
+            </>
+            <div className="relative flex items-center gap-2">
               <button onClick={() => setShowSearch(!showSearch)}>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -87,13 +123,21 @@ const Main = () => {
                   />
                 </svg>
               </button>
-              {showSearch && (
-                <input
-                  type="text"
-                  placeholder="Search..."
-                  className="absolute right-0 top-full mt-2 bg-[#2F2F2F] text-[#D4D4D4] border border-[#838383] rounded px-2 py-1 text-sm w-48"
-                />
-              )}
+
+              <AnimatePresence>
+                {showSearch && (
+                  <motion.input
+                    key="search"
+                    initial={{ width: 0, opacity: 0 }}
+                    animate={{ width: "6rem", opacity: 1 }}
+                    exit={{ width: 0, opacity: 0 }}
+                    transition={{ duration: 0.3, ease: "easeInOut" }}
+                    type="text"
+                    placeholder="Search..."
+                    className="bg-[#2F2F2F] text-[#D4D4D4] border border-[#838383] rounded-2xl px-2 py-1 text-sm overflow-hidden"
+                  />
+                )}
+              </AnimatePresence>
             </div>
           </div>
         </div>
@@ -121,19 +165,68 @@ const Main = () => {
                   </thead>
                   <tbody>
                     {tasks.map((task, index) => (
-                      <tr key={index}>
+                      <tr
+                        className={`text-[#838383] ${
+                          isFinished ? "text-[#838383]/30 line-through" : ""
+                        }`}
+                        key={index}
+                      >
                         <td>
-                          <input
-                            type="checkbox"
-                            checked={task.completed}
-                            readOnly
-                          />
+                          <button onClick={() => setIsFinished(!isFinished)}>
+                            {isFinished ? (
+                              <CheckSquare className="w-5 h-5 text-white bg-green-600 rounded" />
+                            ) : (
+                              <Square className="w-5 h-5 text-[#838383] hover:text-[#D4D4D4]" />
+                            )}
+                          </button>
                         </td>
                         <td>{task.name}</td>
                         <td>{task.date}</td>
                         <td className="flex gap-2">
-                          <button>Edit</button>
-                          <button>Delete</button>
+                          <button
+                            onClick={handleEdit}
+                            disabled={isFinished}
+                            className={`text-[#838383] ${
+                              isFinished
+                                ? "text-gray-600"
+                                : "hover:text-[#D4D4D4]"
+                            }`}
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="w-5 h-5"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M15.232 5.232l3.536 3.536M9 11l6-6 3 3-6 6H9v-3zM16 16h2a2 2 0 012 2v2H6v-2a2 2 0 012-2h8z"
+                              />
+                            </svg>
+                          </button>
+                          <button
+                            className={`text-[#838383] hover:text-[#D4D4D4] ${
+                              isFinished ? "" : ""
+                            }`}
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="w-5 h-5"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M6 18L18 6M6 6l12 12"
+                              />
+                            </svg>
+                          </button>
                         </td>
                       </tr>
                     ))}
@@ -166,20 +259,56 @@ const Main = () => {
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <input
-                          type="checkbox"
-                          checked={task.completed}
-                          readOnly
-                        />
-                        <h3 className="text-base">{task.name}</h3>
+                        <button onClick={() => setIsFinished(!isFinished)}>
+                          {isFinished ? (
+                            <CheckSquare className="w-5 h-5 text-white bg-green-600 rounded" />
+                          ) : (
+                            <Square className="w-5 h-5 text-[#838383] hover:text-[#D4D4D4]" />
+                          )}
+                        </button>
+                        <h3 className={`text-[#838383] ${
+                          isFinished ? "text-[#838383]/30 line-through" : ""
+                        }`}>{task.name}</h3>
                       </div>
-                      <span className="text-sm text-[#838383]">
+                      <span className={`text-[#838383] ${
+                          isFinished ? "text-[#838383]/30 line-through" : ""
+                        }`}>
                         {task.date}
                       </span>
                     </div>
                     <div className="flex justify-end gap-2 text-sm">
-                      <button>Edit</button>
-                      <button>Delete</button>
+                      <button className="text-[#838383] hover:text-[#D4D4D4]">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="w-5 h-5"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M15.232 5.232l3.536 3.536M9 11l6-6 3 3-6 6H9v-3zM16 16h2a2 2 0 012 2v2H6v-2a2 2 0 012-2h8z"
+                          />
+                        </svg>
+                      </button>
+                      <button className="text-[#838383] hover:text-[#D4D4D4]">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="w-5 h-5"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M6 18L18 6M6 6l12 12"
+                          />
+                        </svg>
+                      </button>
                     </div>
                   </div>
                 ))
