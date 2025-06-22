@@ -34,7 +34,7 @@ const Navbar = () => {
   };
   return (
     <nav className="bg-[#191919] text-[#D4D4D4] py-4">
-      <div className="max-w-4xl mx-auto flex items-center justify-between px-4">
+      <div className="max-w-4xl mx-auto flex items-center justify-between">
         {/* Left side: Logo + Name */}
         <div className="flex items-center space-x-2">
           {/* Tick mark icon */}

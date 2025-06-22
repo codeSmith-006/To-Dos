@@ -2,12 +2,13 @@ import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Tooltip } from "react-tooltip";
 import "react-tooltip/dist/react-tooltip.css";
-import { CheckCheck } from "lucide-react";
 import { Square, CheckSquare } from "lucide-react";
 
 const Main = () => {
   // State for view toggle
   const [isTableView, setIsTableView] = useState(true);
+
+  const [date, setDate] = useState(new Date().toISOString().split("T")[0])
 
   const [isFinished, setIsFinished] = useState(false);
 
@@ -52,14 +53,14 @@ const Main = () => {
   };
 
   return (
-    <div className="bg-[#191919] text-[#D4D4D4] min-h-screen px-4 py-6">
+    <div className="bg-[#191919] text-[#D4D4D4] min-h-screen py-6">
       {/* Top Action Bar */}
       <div className="max-w-5xl mx-auto">
         <div className="flex justify-between items-center border-b border-[#838383] pb-2">
           {/* Left: View Toggle */}
           <div className="flex gap-4">
             <button
-              className={`pb-1 border-b-2 ${
+              className={`pb-1 border-b-2 cursor-pointer ${
                 isTableView ? "border-[#838383]" : "border-transparent"
               }`}
               onClick={() => setIsTableView(true)}
@@ -67,7 +68,7 @@ const Main = () => {
               Task
             </button>
             <button
-              className={`pb-1 border-b-2 ${
+              className={`pb-1 border-b-2 cursor-pointer ${
                 !isTableView ? "border-[#838383]" : "border-transparent"
               }`}
               onClick={() => setIsTableView(false)}
@@ -81,7 +82,7 @@ const Main = () => {
             <>
               <button
                 data-tooltip-id="sort-tooltip"
-                className="border border-[#838383] p-1 rounded hover:text-[#D4D4D4] text-[#838383]"
+                className="border cursor-pointer border-[#838383] p-1 rounded hover:text-[#D4D4D4] text-[#838383]"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -110,7 +111,7 @@ const Main = () => {
               <button onClick={() => setShowSearch(!showSearch)}>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className="w-5 h-5 text-[#838383]"
+                  className="w-5 h-5 cursor-pointer text-[#838383]"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -129,7 +130,7 @@ const Main = () => {
                   <motion.input
                     key="search"
                     initial={{ width: 0, opacity: 0 }}
-                    animate={{ width: "6rem", opacity: 1 }}
+                    animate={{ width: "8rem", opacity: 1 }}
                     exit={{ width: 0, opacity: 0 }}
                     transition={{ duration: 0.3, ease: "easeInOut" }}
                     type="text"
@@ -188,7 +189,7 @@ const Main = () => {
                             disabled={isFinished}
                             className={`text-[#838383] ${
                               isFinished
-                                ? "text-gray-600"
+                                ? "text-[#838383]/30 cursor-not-allowed"
                                 : "hover:text-[#D4D4D4]"
                             }`}
                           >
@@ -208,7 +209,7 @@ const Main = () => {
                             </svg>
                           </button>
                           <button
-                            className={`text-[#838383] hover:text-[#D4D4D4] ${
+                            className={`text-[#838383] cursor-pointer hover:text-[#D4D4D4] ${
                               isFinished ? "" : ""
                             }`}
                           >
@@ -266,18 +267,30 @@ const Main = () => {
                             <Square className="w-5 h-5 text-[#838383] hover:text-[#D4D4D4]" />
                           )}
                         </button>
-                        <h3 className={`text-[#838383] ${
-                          isFinished ? "text-[#838383]/30 line-through" : ""
-                        }`}>{task.name}</h3>
+                        <h3
+                          className={`text-[#838383] ${
+                            isFinished ? "text-[#838383]/30 line-through" : ""
+                          }`}
+                        >
+                          {task.name}
+                        </h3>
                       </div>
-                      <span className={`text-[#838383] ${
+                      <span
+                        className={`text-[#838383] ${
                           isFinished ? "text-[#838383]/30 line-through" : ""
-                        }`}>
+                        }`}
+                      >
                         {task.date}
                       </span>
                     </div>
                     <div className="flex justify-end gap-2 text-sm">
-                      <button className="text-[#838383] hover:text-[#D4D4D4]">
+                      <button
+                        className={`text-[#838383] ${
+                          isFinished
+                            ? "text-[#838383]/30 cursor-not-allowed"
+                            : "hover:text-[#D4D4D4]"
+                        }`}
+                      >
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
                           className="w-5 h-5"
@@ -293,7 +306,11 @@ const Main = () => {
                           />
                         </svg>
                       </button>
-                      <button className="text-[#838383] hover:text-[#D4D4D4]">
+                      <button
+                        className={`text-[#838383] cursor-pointer hover:text-[#D4D4D4] ${
+                          isFinished ? "" : ""
+                        }`}
+                      >
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
                           className="w-5 h-5"
@@ -346,7 +363,7 @@ const Main = () => {
                 type="date"
                 className="input input-bordered bg-[#191919] border-[#838383] text-[#D4D4D4]"
                 required
-                value={newTask.date}
+                defaultValue={date}
                 onChange={(e) =>
                   setNewTask({ ...newTask, date: e.target.value })
                 }
