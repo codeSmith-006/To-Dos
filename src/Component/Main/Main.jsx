@@ -1,8 +1,10 @@
-import React, { useState } from "react";
+import React, { use, useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Tooltip } from "react-tooltip";
 import "react-tooltip/dist/react-tooltip.css";
-import { Square, CheckSquare } from "lucide-react";
+import { Square, CheckSquare, Axis3D } from "lucide-react";
+import AuthContext from "../../Context/AuthContext";
+import axios from "axios";
 
 const Main = () => {
   // State for view toggle
@@ -18,11 +20,27 @@ const Main = () => {
   // Show/hide add task modal
   const [showModal, setShowModal] = useState(false);
 
-  // New task input values
-  const [newTask, setNewTask] = useState({ name: "", date: "" });
-
   // Task list
   const [tasks, setTasks] = useState([]);
+
+  // current user 
+  const {currentUser} = use(AuthContext);
+
+  useEffect(() => {
+    const getTasks = async () => {
+      try {
+        const response = await axios.get('http://localhost:5000/tasks');
+        setTasks(response?.data)
+      } catch (error) {
+        console.log("Error while getting tasks: ", error)
+      }
+    }
+
+    getTasks();
+  }, [])
+
+  // all tasks
+  console.log("tasks: ", tasks)
 
   // Format date like "Jun 22, 2025"
   const formatDate = (dateString) => {
@@ -32,25 +50,54 @@ const Main = () => {
   };
 
   // Handle adding a new task
-  const handleAddTask = (e) => {
-    e.preventDefault();
-    const formattedDate = formatDate(newTask.date);
+  const handleAddTask = async (event) => {
+    event.preventDefault();
 
-    const newEntry = {
-      name: newTask.name,
-      date: formattedDate,
-      completed: false,
-    };
+    // getting the task 
+    const task = event.target.task.value;
+    const date = event.target.date.value;
 
-    setTasks([...tasks, newEntry]);
-    setNewTask({ name: "", date: "" });
+    // task object data
+    const taskDetails = {
+      Task: task,
+      Date: date,
+      User: currentUser?.email,
+      isFinishedBool: isFinished
+    }
+
+    console.log("Task details: ", taskDetails)
     setShowModal(false);
+
+    // send task details to database
+    try {
+      const response = await axios.post('http://localhost:5000/tasks', taskDetails);
+      console.log("Response: ", response.data)
+    } catch (error) {
+      console.log("Error while post task details to database: ", error)
+    }
   };
 
   // handle edit
   const handleEdit = () => {
     console.log("Edit");
   };
+
+  // handle check task
+  const handleTick = async (id) => {
+    console.log("Clicked id: ", id);
+    const updatedTask = tasks.map(task => id === task._id ? {...task, isFinished:true} : task);
+    setTasks(updatedTask);
+    const targetId = id;
+    console.log("Targeted id: ", id)
+
+    // updating in the database
+    try {
+      const response = await axios.patch("http://localhost:5000/tasks", {targetId});
+      console.log("Response for patch: ", response.data)
+    } catch (error) {
+      console.log("Error while patching in the database: ", error)
+    }
+  }
 
   return (
     <div className="bg-[#191919] text-[#D4D4D4] min-h-screen py-6">
@@ -168,27 +215,27 @@ const Main = () => {
                     {tasks.map((task, index) => (
                       <tr
                         className={`text-[#838383] ${
-                          isFinished ? "text-[#838383]/30 line-through" : ""
+                          task?.isFinished ? "text-[#838383]/30 line-through" : ""
                         }`}
                         key={index}
                       >
                         <td>
-                          <button onClick={() => setIsFinished(!isFinished)}>
-                            {isFinished ? (
+                          <button onClick={() => handleTick(task?._id)}>
+                            {task?.isFinished ? (
                               <CheckSquare className="w-5 h-5 text-white bg-green-600 rounded" />
                             ) : (
                               <Square className="w-5 h-5 text-[#838383] hover:text-[#D4D4D4]" />
                             )}
                           </button>
                         </td>
-                        <td>{task.name}</td>
-                        <td>{task.date}</td>
+                        <td>{task?.Task}</td>
+                        <td>{task?.Date}</td>
                         <td className="flex gap-2">
                           <button
-                            onClick={handleEdit}
-                            disabled={isFinished}
+                            onClick={() => handleEdit(task?._id)}
+                            disabled={task?.isFinished}
                             className={`text-[#838383] ${
-                              isFinished
+                              task?.isFinished
                                 ? "text-[#838383]/30 cursor-not-allowed"
                                 : "hover:text-[#D4D4D4]"
                             }`}
@@ -210,7 +257,7 @@ const Main = () => {
                           </button>
                           <button
                             className={`text-[#838383] cursor-pointer hover:text-[#D4D4D4] ${
-                              isFinished ? "" : ""
+                              task?.isFinished ? "" : ""
                             }`}
                           >
                             <svg
@@ -260,8 +307,8 @@ const Main = () => {
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <button onClick={() => setIsFinished(!isFinished)}>
-                          {isFinished ? (
+                        <button onClick={() => handleTick(task?._id)}>
+                          {task?.isFinished ? (
                             <CheckSquare className="w-5 h-5 text-white bg-green-600 rounded" />
                           ) : (
                             <Square className="w-5 h-5 text-[#838383] hover:text-[#D4D4D4]" />
@@ -269,7 +316,7 @@ const Main = () => {
                         </button>
                         <h3
                           className={`text-[#838383] ${
-                            isFinished ? "text-[#838383]/30 line-through" : ""
+                            task?.isFinished ? "text-[#838383]/30 line-through" : ""
                           }`}
                         >
                           {task.name}
@@ -277,7 +324,7 @@ const Main = () => {
                       </div>
                       <span
                         className={`text-[#838383] ${
-                          isFinished ? "text-[#838383]/30 line-through" : ""
+                          task?.isFinished ? "text-[#838383]/30 line-through" : ""
                         }`}
                       >
                         {task.date}
@@ -308,7 +355,7 @@ const Main = () => {
                       </button>
                       <button
                         className={`text-[#838383] cursor-pointer hover:text-[#D4D4D4] ${
-                          isFinished ? "" : ""
+                          task?.isFinished ? "" : ""
                         }`}
                       >
                         <svg
@@ -352,21 +399,22 @@ const Main = () => {
               <input
                 type="text"
                 placeholder="Task name"
+                name="task"
                 className="input input-bordered bg-[#191919] border-[#838383] placeholder-[#838383] text-[#D4D4D4]"
                 required
-                value={newTask.name}
-                onChange={(e) =>
-                  setNewTask({ ...newTask, name: e.target.value })
-                }
+                // onChange={(e) =>
+                //   setNewTask({ ...newTask, name: e.target.value })
+                // }
               />
               <input
                 type="date"
+                name="date"
                 className="input input-bordered bg-[#191919] border-[#838383] text-[#D4D4D4]"
                 required
                 defaultValue={date}
-                onChange={(e) =>
-                  setNewTask({ ...newTask, date: e.target.value })
-                }
+                // onChange={(e) =>
+                //   setNewTask({ ...newTask, date: e.target.value })
+                // }
               />
               <div className="modal-action">
                 <button
