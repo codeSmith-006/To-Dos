@@ -4,9 +4,12 @@ import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { auth } from "../../Firebase/firebase.config";
 import Loading from "../Loading/Loading";
 import Tooltip from "@mui/material/Tooltip";
+import { useNavigate } from "react-router-dom";
 
 const Navbar = () => {
   const { currentUser, loading, logout } = use(AuthContext);
+
+  const navigate = useNavigate();
 
   const handleGoogleSignIn = async () => {
     const provider = new GoogleAuthProvider();
@@ -20,6 +23,7 @@ const Navbar = () => {
   const handleLogOut = async () => {
     try {
       await logout();
+      navigate('/')
     } catch (error) {
       console.log("Error in logout: ", error);
     }
