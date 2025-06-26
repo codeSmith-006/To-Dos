@@ -4,43 +4,35 @@ import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { auth } from "../../Firebase/firebase.config";
 import Loading from "../Loading/Loading";
 import Tooltip from "@mui/material/Tooltip";
+
 const Navbar = () => {
-  // getting current user
   const { currentUser, loading, logout } = use(AuthContext);
 
-  console.log("Photo: ", currentUser?.photoURL)
-
-  // handle google sign in button
   const handleGoogleSignIn = async () => {
-    // google provider
-
     const provider = new GoogleAuthProvider();
-
     try {
-      const response = await signInWithPopup(auth, provider);
+      await signInWithPopup(auth, provider);
     } catch (error) {
-      console.log("Error while create account with google: ", error);
+      console.log("Error while signing in with Google: ", error);
     }
   };
 
-  // handling handleLogOut
   const handleLogOut = async () => {
     try {
-      const response = await logout();
-      console.log(response);
+      await logout();
     } catch (error) {
       console.log("Error in logout: ", error);
     }
   };
+
   return (
     <nav className="bg-[#191919] text-[#D4D4D4] py-4">
       <div className="max-w-4xl mx-auto flex items-center justify-between">
-        {/* Left side: Logo + Name */}
+        {/* Left: Logo & Title */}
         <div className="flex items-center space-x-2">
-          {/* Tick mark icon */}
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            className="h-8 text-2xl w-8 text-[#838383]"
+            className="h-8 w-8 text-[#838383]"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -55,21 +47,30 @@ const Navbar = () => {
           <span className="text-2xl font-bold select-none">To-Dos</span>
         </div>
 
-        {/* show login or user based on current user */}
+        {/* Right: Auth */}
         {loading ? (
-          <Loading></Loading>
+          <Loading />
         ) : currentUser ? (
-          <div className="flex gap-2 items-center">
-            {/* User dropdown */}
+          <div className="flex items-center gap-3">
+            {/* Greeting */}
+            <p className="hidden sm:inline text-sm md:text-base">
+              Hey, <span className="font-medium">{currentUser.displayName?.split(" ")[0]}</span>
+            </p>
+
+            {/* User avatar */}
             <div className="dropdown dropdown-end">
-              <Tooltip title={`${currentUser?.displayName}`}>
+              <Tooltip title={currentUser.displayName || "Profile"}>
                 <div
                   tabIndex={0}
                   role="button"
                   className="btn btn-ghost btn-circle avatar"
                 >
                   <div className="w-10 rounded-full border-2 border-[#838383]">
-                    <img alt="User avatar" src={`${currentUser?.photoURL}`} />
+                    <img
+                      src={currentUser.photoURL}
+                      alt="User Avatar"
+                      referrerPolicy="no-referrer"
+                    />
                   </div>
                 </div>
               </Tooltip>
