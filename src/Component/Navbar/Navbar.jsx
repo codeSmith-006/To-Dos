@@ -35,7 +35,7 @@ const Navbar = () => {
 
   return (
     <nav className="bg-[#191919] text-[#D4D4D4] py-4">
-      <div className="max-w-4xl mx-auto flex items-center justify-between">
+      <div className="max-w-5xl mx-auto flex items-center justify-between">
         {/* Left: Logo & Title */}
         <div className="flex items-center space-x-2">
           <svg
@@ -52,7 +52,17 @@ const Navbar = () => {
               d="M5 13l4 4L19 7"
             />
           </svg>
-          <span className="text-2xl font-bold select-none">To-Dos</span>
+          <span className="text-sm md:text-2xl font-bold select-none block">
+            <Typewriter
+              words={["To-Dos"]}
+              loop={1}
+              cursor
+              cursorStyle="|"
+              typeSpeed={100}
+              deleteSpeed={50}
+              delaySpeed={1500}
+            />
+          </span>
         </div>
 
         {/* Right: Auth */}
@@ -61,9 +71,10 @@ const Navbar = () => {
         ) : currentUser ? (
           <div className="flex items-center gap-3">
             {/* Greeting */}
-            <p className="hidden sm:inline text-sm md:text-base">
+            <p className="sm:inline text-sm md:text-base">
+              Hey, 
               <Typewriter
-                words={[`Hey, ${fullName}`]}
+                words={[`${fullName}`]}
                 loop={Infinity}
                 cursor
                 cursorStyle="|"

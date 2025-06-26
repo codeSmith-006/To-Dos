@@ -11,7 +11,6 @@ import confirmDialog from "../confirmDialog/confirmDialog";
 import AxiosX from "../../Auth/AxiosX/AxiosX";
 
 const Main = () => {
-  const [isTableView, setIsTableView] = useState(true);
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
   const [isFinished, setIsFinished] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
@@ -22,9 +21,25 @@ const Main = () => {
   const [taskForEdit, setTaskForEdit] = useState(null);
   const [action, setAction] = useState("Add");
   const [tableNameInput, setTableNameInput] = useState("");
+  const [isTableView, setIsTableView] = useState(true);
 
   const { currentUser, loading } = useContext(AuthContext);
   const [dataFetchLoading, setDataFetchLoading] = useState(true);
+
+  // handling layout view
+  useEffect(() => {
+    const savedView = localStorage.getItem("preferredView");
+    if (savedView === "table" || savedView === "board") {
+      setIsTableView(savedView === "table");
+    }
+  }, []);
+
+  const handleViewChange = (view) => {
+    setIsTableView(view === "table");
+    localStorage.setItem("preferredView", view);
+  };
+
+  console.log("layout", isTableView)
 
   useEffect(() => {
     const getTasks = async () => {
@@ -178,7 +193,7 @@ const Main = () => {
               className={`pb-1 border-b-2 cursor-pointer ${
                 isTableView ? "border-[#838383]" : "border-transparent"
               }`}
-              onClick={() => setIsTableView(true)}
+              onClick={() => handleViewChange('table')}
             >
               Task
             </button>
@@ -186,7 +201,7 @@ const Main = () => {
               className={`pb-1 border-b-2 cursor-pointer ${
                 !isTableView ? "border-[#838383]" : "border-transparent"
               }`}
-              onClick={() => setIsTableView(false)}
+              onClick={() => handleViewChange('board')}
             >
               Board
             </button>
