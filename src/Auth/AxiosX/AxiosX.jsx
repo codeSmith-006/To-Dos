@@ -10,7 +10,7 @@ let accessToken = null;
 // eslint-disable-next-line react-refresh/only-export-components
 export let getToken = token => {
     accessToken = token;
-    console.log("Token: ", accessToken)
+    // console.log("Token: ", accessToken)
 }
 
 

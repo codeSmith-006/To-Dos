@@ -14,7 +14,7 @@ const AuthProvider = ({ children }) => {
       if (user) {
         setCurrentUser(user);
         const token = await user.getIdToken();
-        console.log("token: ", token)
+        // console.log("token: ", token)
         if (token) {
             getToken(token)
         } else {

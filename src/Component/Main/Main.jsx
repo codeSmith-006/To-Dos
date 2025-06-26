@@ -148,7 +148,7 @@ const Main = () => {
         id === task._id ? { ...task, isFinished: true } : task
       );
 
-      console.log("Confirmed: ", confirmed);
+      // console.log("Confirmed: ", confirmed);
       setTasks(updatedTask);
 
       try {
@@ -272,210 +272,214 @@ const Main = () => {
         </div>
 
         {/* Task View */}
-        <div className="mt-6">
-          {isTableView ? (
-            <div className="overflow-x-auto space-y-8">
-              {uniqueTableNames.length === 0 && filteredTasks.length === 0 ? (
-                <div className="text-center text-white py-10">
-                  ✨ No tasks found. Click{" "}
-                  <span className="text-[#D4D4D4] font-semibold">+</span> to add
-                  one!
-                </div>
-              ) : (
-                uniqueTableNames.map((table, i) => {
-                  const tasksInTable = filteredTasks.filter(
-                    (t) => t.tableName === table
-                  );
-                  if (tasksInTable.length === 0) return null;
-                  return (
-                    <div key={i}>
-                      <h2 className="text-xl font-semibold mb-2 border-b border-[#838383] pb-1">
-                        {table}
-                      </h2>
-                      <table className="table w-full bg-[#2F2F2F] rounded-lg">
-                        <thead className="text-white">
-                          <tr>
-                            <th className="w-10"></th>
-                            <th className="text-left">Task</th>
-                            <th className="text-left">Date</th>
-                            <th className="text-left">Time</th>
-                            <th className="text-left">Actions</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {tasksInTable.map((task, index) => (
-                            <tr
-                              key={task._id || index}
-                              className={`align-top ${
-                                task?.isFinished
-                                  ? "text-white/30"
-                                  : "text-white"
-                              }`}
-                            >
-                              <td className="align-top pt-3">
-                                <button onClick={() => handleTick(task._id)}>
-                                  {task.isFinished ? (
-                                    <CheckSquare className="w-5 cursor-not-allowed h-5 text-white bg-green-600 rounded" />
-                                  ) : (
-                                    <Square className="w-5 h-5 cursor-progress text-white hover:text-[#D4D4D4]" />
-                                  )}
-                                </button>
-                              </td>
-                              <td className="max-w-sm break-words pt-3">
-                                {task.Task}
-                              </td>
-                              <td className="pt-3">{task.Date}</td>
-                              <td className="pt-3">{task.Time || "--:--"}</td>
-                              <td className="flex gap-3 pt-2">
-                                <button
-                                  onClick={() => {
-                                    setShowModal(true);
-                                    setAction("Edit");
-                                    setTaskForEdit(task);
-                                    setTableNameInput(task.tableName || "");
-                                  }}
-                                  disabled={task.isFinished}
-                                  className={`${
-                                    task.isFinished
-                                      ? "text-white/30 cursor-not-allowed"
-                                      : "text-white cursor-pointer hover:text-[#D4D4D4]"
-                                  }`}
-                                >
-                                  <Edit3 className="w-4 h-4" />
-                                </button>
-                                <button
-                                  onClick={() => handleDelete(task._id)}
-                                  className="text-white cursor-pointer hover:text-[#D4D4D4]"
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                </button>
-                              </td>
+        {dataFetchLoading ? (
+          <Loading></Loading>
+        ) : (
+          <div className="mt-6">
+            {isTableView ? (
+              <div className="overflow-x-auto space-y-8">
+                {uniqueTableNames.length === 0 && filteredTasks.length === 0 ? (
+                  <div className="text-center text-white py-10">
+                    ✨ No tasks found. Click{" "}
+                    <span className="text-[#D4D4D4] font-semibold">+</span> to
+                    add one!
+                  </div>
+                ) : (
+                  uniqueTableNames.map((table, i) => {
+                    const tasksInTable = filteredTasks.filter(
+                      (t) => t.tableName === table
+                    );
+                    if (tasksInTable.length === 0) return null;
+                    return (
+                      <div key={i}>
+                        <h2 className="text-xl font-semibold mb-2 border-b border-[#838383] pb-1">
+                          {table}
+                        </h2>
+                        <table className="table w-full bg-[#2F2F2F] rounded-lg">
+                          <thead className="text-white">
+                            <tr>
+                              <th className="w-10"></th>
+                              <th className="text-left">Task</th>
+                              <th className="text-left">Date</th>
+                              <th className="text-left">Time</th>
+                              <th className="text-left">Actions</th>
                             </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  );
-                })
-              )}
-              <div className="flex justify-end mt-4">
-                <button
-                  onClick={() => {
-                    setShowModal(true);
-                    setAction("Add");
-                    setTableNameInput("");
-                  }}
-                  className="btn btn-circle bg-[#838383] text-[#191919]"
-                >
-                  +
-                </button>
-              </div>
-            </div>
-          ) : (
-            <div className="mt-4 space-y-8">
-              {uniqueTableNames.length === 0 ? (
-                <div className="text-center text-white py-10">
-                  ✨ No tasks found. Click{" "}
-                  <span className="text-[#D4D4D4] font-semibold">+</span> to add
-                  one!
+                          </thead>
+                          <tbody>
+                            {tasksInTable.map((task, index) => (
+                              <tr
+                                key={task._id || index}
+                                className={`align-top ${
+                                  task?.isFinished
+                                    ? "text-white/30"
+                                    : "text-white"
+                                }`}
+                              >
+                                <td className="align-top pt-3">
+                                  <button onClick={() => handleTick(task._id)}>
+                                    {task.isFinished ? (
+                                      <CheckSquare className="w-5 cursor-not-allowed h-5 text-white bg-green-600 rounded" />
+                                    ) : (
+                                      <Square className="w-5 h-5 cursor-progress text-white hover:text-[#D4D4D4]" />
+                                    )}
+                                  </button>
+                                </td>
+                                <td className="max-w-sm break-words pt-3">
+                                  {task.Task}
+                                </td>
+                                <td className="pt-3">{task.Date}</td>
+                                <td className="pt-3">{task.Time || "--:--"}</td>
+                                <td className="flex gap-3 pt-2">
+                                  <button
+                                    onClick={() => {
+                                      setShowModal(true);
+                                      setAction("Edit");
+                                      setTaskForEdit(task);
+                                      setTableNameInput(task.tableName || "");
+                                    }}
+                                    disabled={task.isFinished}
+                                    className={`${
+                                      task.isFinished
+                                        ? "text-white/30 cursor-not-allowed"
+                                        : "text-white cursor-pointer hover:text-[#D4D4D4]"
+                                    }`}
+                                  >
+                                    <Edit3 className="w-4 h-4" />
+                                  </button>
+                                  <button
+                                    onClick={() => handleDelete(task._id)}
+                                    className="text-white cursor-pointer hover:text-[#D4D4D4]"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </button>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    );
+                  })
+                )}
+                <div className="flex justify-end mt-4">
+                  <button
+                    onClick={() => {
+                      setShowModal(true);
+                      setAction("Add");
+                      setTableNameInput("");
+                    }}
+                    className="btn btn-circle bg-[#838383] text-[#191919]"
+                  >
+                    +
+                  </button>
                 </div>
-              ) : (
-                uniqueTableNames.map((table, i) => {
-                  const tasksForTable = filteredTasks.filter(
-                    (task) => (task.tableName || "Untitled") === table
-                  );
+              </div>
+            ) : (
+              <div className="mt-4 space-y-8">
+                {uniqueTableNames.length === 0 ? (
+                  <div className="text-center text-white py-10">
+                    ✨ No tasks found. Click{" "}
+                    <span className="text-[#D4D4D4] font-semibold">+</span> to
+                    add one!
+                  </div>
+                ) : (
+                  uniqueTableNames.map((table, i) => {
+                    const tasksForTable = filteredTasks.filter(
+                      (task) => (task.tableName || "Untitled") === table
+                    );
 
-                  return (
-                    <div key={i}>
-                      <h2 className="text-xl font-semibold mb-4 text-white border-b border-[#838383] pb-1">
-                        {table}
-                      </h2>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                        {tasksForTable.length === 0 ? (
-                          <div className="text-white/50 col-span-full text-center">
-                            No tasks in this board.
-                          </div>
-                        ) : (
-                          tasksForTable.map((task, index) => (
-                            <div
-                              key={task._id || index}
-                              className="bg-[#2F2F2F] p-4 rounded-lg flex flex-col justify-between min-h-[120px]"
-                            >
-                              <div className="flex items-start gap-2">
-                                <button onClick={() => handleTick(task._id)}>
-                                  {task.isFinished ? (
-                                    <CheckSquare className="w-5 h-5 cursor-not-allowed text-white bg-green-600 rounded" />
-                                  ) : (
-                                    <Square className="w-5 h-5 cursor-progress text-white hover:text-[#D4D4D4]" />
-                                  )}
-                                </button>
-                                <h3
-                                  className={`break-words text-left flex-1 ${
+                    return (
+                      <div key={i}>
+                        <h2 className="text-xl font-semibold mb-4 text-white border-b border-[#838383] pb-1">
+                          {table}
+                        </h2>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                          {tasksForTable.length === 0 ? (
+                            <div className="text-white/50 col-span-full text-center">
+                              No tasks in this board.
+                            </div>
+                          ) : (
+                            tasksForTable.map((task, index) => (
+                              <div
+                                key={task._id || index}
+                                className="bg-[#2F2F2F] p-4 rounded-lg flex flex-col justify-between min-h-[120px]"
+                              >
+                                <div className="flex items-start gap-2">
+                                  <button onClick={() => handleTick(task._id)}>
+                                    {task.isFinished ? (
+                                      <CheckSquare className="w-5 h-5 cursor-not-allowed text-white bg-green-600 rounded" />
+                                    ) : (
+                                      <Square className="w-5 h-5 cursor-progress text-white hover:text-[#D4D4D4]" />
+                                    )}
+                                  </button>
+                                  <h3
+                                    className={`break-words text-left flex-1 ${
+                                      task.isFinished
+                                        ? "text-white/30"
+                                        : "text-white"
+                                    }`}
+                                  >
+                                    {task.Task}
+                                  </h3>
+                                </div>
+                                <div
+                                  className={`text-sm mt-2 ${
                                     task.isFinished
                                       ? "text-white/30"
                                       : "text-white"
-                                  }`}
+                                  } text-right`}
                                 >
-                                  {task.Task}
-                                </h3>
+                                  {task.Date} — {task.Time || "--:--"}
+                                </div>
+                                <div className="flex justify-end gap-3 mt-2">
+                                  <button
+                                    onClick={() => {
+                                      setShowModal(true);
+                                      setAction("Edit");
+                                      setTaskForEdit(task);
+                                      setTableNameInput(task.tableName || "");
+                                    }}
+                                    disabled={task.isFinished}
+                                    className={`${
+                                      task.isFinished
+                                        ? "cursor-not-allowed text-white/30"
+                                        : "text-white cursor-pointer hover:text-[#D4D4D4]"
+                                    }`}
+                                  >
+                                    <Edit3 size={18} />
+                                  </button>
+                                  <button
+                                    onClick={() => handleDelete(task._id)}
+                                    className="text-white cursor-pointer hover:text-[#D4D4D4]"
+                                  >
+                                    <Trash2 size={18} />
+                                  </button>
+                                </div>
                               </div>
-                              <div
-                                className={`text-sm mt-2 ${
-                                  task.isFinished
-                                    ? "text-white/30"
-                                    : "text-white"
-                                } text-right`}
-                              >
-                                {task.Date} — {task.Time || "--:--"}
-                              </div>
-                              <div className="flex justify-end gap-3 mt-2">
-                                <button
-                                  onClick={() => {
-                                    setShowModal(true);
-                                    setAction("Edit");
-                                    setTaskForEdit(task);
-                                    setTableNameInput(task.tableName || "");
-                                  }}
-                                  disabled={task.isFinished}
-                                  className={`${
-                                    task.isFinished
-                                      ? "cursor-not-allowed text-white/30"
-                                      : "text-white cursor-pointer hover:text-[#D4D4D4]"
-                                  }`}
-                                >
-                                  <Edit3 size={18} />
-                                </button>
-                                <button
-                                  onClick={() => handleDelete(task._id)}
-                                  className="text-white cursor-pointer hover:text-[#D4D4D4]"
-                                >
-                                  <Trash2 size={18} />
-                                </button>
-                              </div>
-                            </div>
-                          ))
-                        )}
+                            ))
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  );
-                })
-              )}
+                    );
+                  })
+                )}
 
-              <div className="flex justify-center pt-4">
-                <button
-                  onClick={() => {
-                    setShowModal(true);
-                    setAction("Add");
-                    setTableNameInput("");
-                  }}
-                  className="btn btn-circle bg-[#838383] text-[#191919]"
-                >
-                  +
-                </button>
+                <div className="flex justify-center pt-4">
+                  <button
+                    onClick={() => {
+                      setShowModal(true);
+                      setAction("Add");
+                      setTableNameInput("");
+                    }}
+                    className="btn btn-circle bg-[#838383] text-[#191919]"
+                  >
+                    +
+                  </button>
+                </div>
               </div>
-            </div>
-          )}
-        </div>
+            )}
+          </div>
+        )}
       </div>
 
       {showModal && (

@@ -5,11 +5,15 @@ import { auth } from "../../Firebase/firebase.config";
 import Loading from "../Loading/Loading";
 import Tooltip from "@mui/material/Tooltip";
 import { useNavigate } from "react-router-dom";
+import { Typewriter } from "react-simple-typewriter";
 
 const Navbar = () => {
   const { currentUser, loading, logout } = use(AuthContext);
 
   const navigate = useNavigate();
+
+  // full name
+  const fullName = currentUser?.displayName || "User";
 
   const handleGoogleSignIn = async () => {
     const provider = new GoogleAuthProvider();
@@ -23,7 +27,7 @@ const Navbar = () => {
   const handleLogOut = async () => {
     try {
       await logout();
-      navigate('/')
+      navigate("/");
     } catch (error) {
       console.log("Error in logout: ", error);
     }
@@ -58,7 +62,15 @@ const Navbar = () => {
           <div className="flex items-center gap-3">
             {/* Greeting */}
             <p className="hidden sm:inline text-sm md:text-base">
-              Hey, <span className="font-medium">{currentUser.displayName?.split(" ")[0]}</span>
+              <Typewriter
+                words={[`Hey, ${fullName}`]}
+                loop={Infinity}
+                cursor
+                cursorStyle="|"
+                typeSpeed={70}
+                deleteSpeed={50}
+                delaySpeed={2000}
+              />
             </p>
 
             {/* User avatar */}
