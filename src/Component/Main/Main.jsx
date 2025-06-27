@@ -44,7 +44,7 @@ const Main = () => {
   useEffect(() => {
     const getTasks = async () => {
       try {
-        const response = await AxiosX.get("http://localhost:5000/tasks");
+        const response = await AxiosX.get("https://to-dos-server.vercel.app/tasks");
         setTasks(response?.data);
         setDataFetchLoading(false);
       } catch (error) {
@@ -93,7 +93,7 @@ const Main = () => {
 
     if (action === "Edit" && taskForEdit) {
       try {
-        await AxiosX.patch(`http://localhost:5000/tasks`, {
+        await AxiosX.patch(`https://to-dos-server.vercel.app/tasks`, {
           ...taskDetails,
           targetId: taskForEdit._id,
           action: "edit",
@@ -112,7 +112,7 @@ const Main = () => {
     } else {
       try {
         const response = await AxiosX.post(
-          "http://localhost:5000/tasks",
+          "https://to-dos-server.vercel.app/tasks",
           taskDetails
         );
         if (response.data?.insertedId) {
@@ -141,7 +141,7 @@ const Main = () => {
       setTasks(remainingTasks);
       try {
         const response = await AxiosX.delete(
-          `http://localhost:5000/tasks/${id}`
+          `https://to-dos-server.vercel.app/tasks/${id}`
         );
         setTasks((prev) => prev.filter((task) => task._id !== id));
       } catch (error) {
@@ -167,7 +167,7 @@ const Main = () => {
       setTasks(updatedTask);
 
       try {
-        const response = await AxiosX.patch("http://localhost:5000/tasks", {
+        const response = await AxiosX.patch("https://to-dos-server.vercel.app/tasks", {
           targetId: id,
           action: "mark-finished",
         });

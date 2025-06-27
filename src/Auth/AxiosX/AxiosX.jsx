@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const AxiosX = axios.create({
-    baseURL: 'http://localhost:5000'
+    baseURL: 'https://to-dos-server.vercel.app'
 })
 
 let accessToken = null;
