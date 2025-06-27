@@ -6,9 +6,10 @@ import Loading from "../Loading/Loading";
 import Tooltip from "@mui/material/Tooltip";
 import { useNavigate } from "react-router-dom";
 import { Typewriter } from "react-simple-typewriter";
+import toast from "react-hot-toast";
 
 const Navbar = () => {
-  const { currentUser, loading, logout } = use(AuthContext);
+  const { currentUser, loading, logout, setCurrentUser } = use(AuthContext);
 
   const navigate = useNavigate();
 
@@ -24,14 +25,26 @@ const Navbar = () => {
     }
   };
 
-  const handleLogOut = async () => {
-    try {
-      await logout();
-      navigate("/");
-    } catch (error) {
-      console.log("Error in logout: ", error);
-    }
-  };
+const handleLogOut = async () => {
+  try {
+    await logout();
+    setCurrentUser(null)
+
+    // Optional: clear localStorage preferences (like view mode)
+    localStorage.removeItem("preferredView");
+    
+
+    // Optional: toast
+    toast.success("Logged out successfully!");
+
+    // Navigate to login or home
+    navigate("/");
+  } catch (error) {
+    console.log("Error in logout:", error);
+    toast.error("Failed to log out.");
+  }
+};
+
 
   return (
     <nav className="bg-[#191919] text-[#D4D4D4] py-4">

@@ -9,37 +9,40 @@ const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   // getting current user
-  useEffect(() => {
-    const unSubscribe = onAuthStateChanged(auth, async (user) => {
-      if (user) {
+useEffect(() => {
+  const unSubscribe = onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      try {
         setCurrentUser(user);
         const token = await user.getIdToken();
-        // console.log("token: ", token)
-        if (token) {
-            getToken(token)
-        } else {
-            getToken(null)
-        }
-        setLoading(false)
-      } else {
-        setCurrentUser(null);
+        getToken(token || null);
+      } catch (err) {
+        console.error("Error fetching token:", err);
+        getToken(null);
       }
-      setLoading(false);
-    });
+    } else {
+      setCurrentUser(null);
+      getToken(null);
+    }
+    setLoading(false);
+  });
 
-    return () => unSubscribe();
-  }, []);
+  return () => unSubscribe();
+}, []);
+
 
   // logout
+  // Inside AuthContext
   const logout = () => {
-    setLoading(false);
-    return signOut(auth);
+    setLoading(true); // Set loading before sign out
+    return signOut(auth).finally(() => setLoading(false));
   };
 
   const info = {
     currentUser,
     loading,
     logout,
+    setCurrentUser
   };
   return <AuthContext value={info}>{!loading && children}</AuthContext>;
 };

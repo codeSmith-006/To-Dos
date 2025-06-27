@@ -39,7 +39,7 @@ const Main = () => {
     localStorage.setItem("preferredView", view);
   };
 
-  console.log("layout", isTableView)
+  // console.log("layout", isTableView)
 
   useEffect(() => {
     const getTasks = async () => {
@@ -293,7 +293,7 @@ const Main = () => {
           <div className="mt-6">
             {isTableView ? (
               <div className="overflow-x-auto space-y-8">
-                {uniqueTableNames.length === 0 && filteredTasks.length === 0 ? (
+                {uniqueTableNames.length === 0 ? (
                   <div className="text-center text-white py-10">
                     ✨ No tasks found. Click{" "}
                     <span className="text-[#D4D4D4] font-semibold">+</span> to
