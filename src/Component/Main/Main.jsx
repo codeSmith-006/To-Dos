@@ -318,7 +318,7 @@ const Main = () => {
                         <table className="table w-full bg-[#2F2F2F] rounded-lg">
                           <thead className="text-white">
                             <tr>
-                              <th className="w-10"></th>
+                              <th className="w-10">#</th>
                               <th className="text-left">Task</th>
                               <th className="text-left">Date</th>
                               <th className="text-left">Time</th>
@@ -335,14 +335,8 @@ const Main = () => {
                                     : "text-white"
                                 }`}
                               >
-                                <td className="align-top pt-3">
-                                  <button onClick={() => handleTick(task._id)}>
-                                    {task.isFinished ? (
-                                      <CheckSquare className="w-5 cursor-not-allowed h-5 text-white bg-green-600 rounded" />
-                                    ) : (
-                                      <Square className="w-5 h-5 cursor-progress text-white hover:text-[#D4D4D4]" />
-                                    )}
-                                  </button>
+                                <td className="align-top pt-3 font-semibold">
+                                  {index + 1}
                                 </td>
                                 <td className="max-w-sm break-words pt-3 align-top">
                                   {task.Task}
@@ -429,6 +423,9 @@ const Main = () => {
                                 className="bg-[#2F2F2F] p-4 rounded-lg flex flex-col justify-between min-h-[120px]"
                               >
                                 <div className="flex items-start gap-2">
+                                  <span className="text-sm text-white/50 font-semibold">
+                                    {index + 1}.
+                                  </span>
                                   <button onClick={() => handleTick(task._id)}>
                                     {task.isFinished ? (
                                       <CheckSquare className="w-5 h-5 cursor-not-allowed text-white bg-green-600 rounded" />
