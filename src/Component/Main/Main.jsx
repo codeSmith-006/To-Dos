@@ -22,6 +22,7 @@ const Main = () => {
   const [action, setAction] = useState("Add");
   const [tableNameInput, setTableNameInput] = useState("");
   const [isTableView, setIsTableView] = useState(true);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
   const { currentUser, loading } = useContext(AuthContext);
   const [dataFetchLoading, setDataFetchLoading] = useState(true);
@@ -34,7 +35,7 @@ const Main = () => {
     }
   }, []);
 
-  const handleViewChange = (view) => {
+  const handleViewChangeLayout = (view) => {
     setIsTableView(view === "table");
     localStorage.setItem("preferredView", view);
   };
@@ -55,6 +56,18 @@ const Main = () => {
     };
     getTasks();
   }, []);
+
+  // Handle window resize
+  useEffect(() => {
+    const onResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
+  // View toggle handler
+  const handleViewChange = (view) => {
+    setIsTableView(view === "table");
+  };
 
   const uniqueTableNames = [
     ...new Set(tasks.map((task) => task.tableName).filter(Boolean)),
@@ -189,16 +202,16 @@ const Main = () => {
   return (
     <div className="bg-[#191919] text-[#D4D4D4] min-h-screen py-6">
       <Toaster />
-      {/* Add rest of your unchanged JSX content here (buttons, table, board, etc.) */}
       <div className="max-w-5xl mx-auto">
         {/* Top Bar */}
         <div className="flex justify-between items-center border-b border-[#838383] pb-2">
-          <div className="flex gap-4">
+          {/* Toggle only on md+ */}
+          <div className="hidden md:flex gap-4">
             <button
               className={`pb-1 border-b-2 cursor-pointer ${
                 isTableView ? "border-[#838383]" : "border-transparent"
               }`}
-              onClick={() => handleViewChange("table")}
+              onClick={() => handleViewChangeLayout("table")}
             >
               Task
             </button>
@@ -206,14 +219,14 @@ const Main = () => {
               className={`pb-1 border-b-2 cursor-pointer ${
                 !isTableView ? "border-[#838383]" : "border-transparent"
               }`}
-              onClick={() => handleViewChange("board")}
+              onClick={() => handleViewChangeLayout("board")}
             >
               Board
             </button>
           </div>
 
+          {/* Sort & Search */}
           <div className="flex items-center gap-3">
-            {/* Sort */}
             <button
               data-tooltip-id="sort-tooltip"
               className="border cursor-pointer border-[#838383] p-1 rounded text-white hover:text-[#D4D4D4]"
@@ -251,12 +264,10 @@ const Main = () => {
                   ? "Sort: In Progress First"
                   : "Sort: Finished First"
               }
-              className="z-50"
             />
 
-            {/* Search */}
             <div className="relative flex items-center gap-2">
-              <button onClick={() => setShowSearch(!showSearch)}>
+              <button onClick={() => setShowSearch((prev) => !prev)}>
                 <svg
                   className="w-5 h-5 text-white hover:text-[#D4D4D4]"
                   fill="none"
@@ -293,28 +304,44 @@ const Main = () => {
 
         {/* Task View */}
         {dataFetchLoading ? (
-          <Loading></Loading>
+          <div className="mt-6 text-center text-white">Loading...</div>
         ) : (
-          <div className="mt-6">
-            {isTableView ? (
-              <div className="overflow-x-auto space-y-8">
-                {uniqueTableNames.length === 0 ? (
-                  <div className="text-center text-white py-10">
-                    ✨ No tasks found. Click{" "}
-                    <span className="text-[#D4D4D4] font-semibold">+</span> to
-                    add one!
-                  </div>
-                ) : (
-                  uniqueTableNames.map((table, i) => {
-                    const tasksInTable = filteredTasks.filter(
-                      (t) => t.tableName === table
-                    );
-                    if (tasksInTable.length === 0) return null;
-                    return (
-                      <div key={i}>
-                        <h2 className="text-xl font-semibold mb-2 border-b border-[#838383] pb-1">
-                          {table}
-                        </h2>
+          <div className="mt-6 space-y-8">
+            {/* Top Add Button */}
+            <div className="flex justify-center mb-4">
+              <button
+                onClick={() => {
+                  setShowModal(true);
+                  setAction("Add");
+                  setTableNameInput("");
+                }}
+                className="btn btn-circle bg-[#838383] text-[#191919]"
+              >
+                +
+              </button>
+            </div>
+
+            {uniqueTableNames.length === 0 ? (
+              <div className="text-center text-white py-10">
+                ✨ No tasks found. Click{" "}
+                <span className="text-[#D4D4D4] font-semibold">+</span> to add
+                one!
+              </div>
+            ) : (
+              uniqueTableNames.map((table, i) => {
+                const tasks = filteredTasks.filter(
+                  (t) => t.tableName === table
+                );
+                if (!tasks.length) return null;
+                return (
+                  <div key={i}>
+                    <h2 className="text-xl font-semibold mb-2 border-b border-[#838383] pb-1">
+                      {table}
+                    </h2>
+
+                    {/* Table on md+ */}
+                    {!isMobile && isTableView && (
+                      <div className="overflow-x-auto">
                         <table className="table w-full bg-[#2F2F2F] rounded-lg">
                           <thead className="text-white">
                             <tr>
@@ -326,17 +353,17 @@ const Main = () => {
                             </tr>
                           </thead>
                           <tbody>
-                            {tasksInTable.map((task, index) => (
+                            {tasks.map((task, idx) => (
                               <tr
-                                key={task._id || index}
+                                key={task._id || idx}
                                 className={`align-top ${
-                                  task?.isFinished
+                                  task.isFinished
                                     ? "text-white/30"
                                     : "text-white"
                                 }`}
                               >
-                                <td className="align-top pt-3 font-semibold">
-                                  {index + 1}
+                                <td className="pt-3 font-semibold">
+                                  {idx + 1}
                                 </td>
                                 <td className="max-w-sm break-words pt-3 align-top">
                                   {task.Task}
@@ -358,14 +385,14 @@ const Main = () => {
                                       className={`${
                                         task.isFinished
                                           ? "text-white/30 cursor-not-allowed"
-                                          : "text-white cursor-pointer hover:text-[#D4D4D4]"
+                                          : "text-white hover:text-[#D4D4D4]"
                                       }`}
                                     >
                                       <Edit3 className="w-4 h-4" />
                                     </button>
                                     <button
                                       onClick={() => handleDelete(task._id)}
-                                      className="text-white cursor-pointer hover:text-[#D4D4D4]"
+                                      className="text-white hover:text-[#D4D4D4]"
                                     >
                                       <Trash2 className="w-4 h-4" />
                                     </button>
@@ -376,144 +403,103 @@ const Main = () => {
                           </tbody>
                         </table>
                       </div>
-                    );
-                  })
-                )}
-                <div className="flex justify-end mt-4">
-                  <button
-                    onClick={() => {
-                      setShowModal(true);
-                      setAction("Add");
-                      setTableNameInput("");
-                    }}
-                    className="btn btn-circle bg-[#838383] text-[#191919]"
-                  >
-                    +
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div className="mt-4 space-y-8">
-                {uniqueTableNames.length === 0 ? (
-                  <div className="text-center text-white py-10">
-                    ✨ No tasks found. Click{" "}
-                    <span className="text-[#D4D4D4] font-semibold">+</span> to
-                    add one!
-                  </div>
-                ) : (
-                  uniqueTableNames.map((table, i) => {
-                    const tasksForTable = filteredTasks.filter(
-                      (task) => (task.tableName || "Untitled") === table
-                    );
+                    )}
 
-                    return (
-                      <div key={i}>
-                        <h2 className="text-xl font-semibold mb-4 text-white border-b border-[#838383] pb-1">
-                          {table}
-                        </h2>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                          {tasksForTable.length === 0 ? (
-                            <div className="text-white/50 col-span-full text-center">
-                              No tasks in this board.
-                            </div>
-                          ) : (
-                            tasksForTable.map((task, index) => (
-                              <div
-                                key={task._id || index}
-                                className="bg-[#2F2F2F] p-4 rounded-lg flex flex-col justify-between min-h-[120px]"
+                    {/* Board/Card on mobile or board view */}
+                    {(isMobile || !isTableView) && (
+                      <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                        {tasks.map((task, idx) => (
+                          <div
+                            key={task._id || idx}
+                            className="bg-[#2F2F2F] p-4 rounded-lg flex flex-col justify-between min-h-[120px]"
+                          >
+                            <div className="flex items-start gap-2">
+                              <button onClick={() => handleTick(task._id)}>
+                                {task.isFinished ? (
+                                  <CheckSquare className="w-5 h-5 cursor-not-allowed text-white bg-green-600 rounded" />
+                                ) : (
+                                  <Square className="w-5 h-5 cursor-progress text-white hover:text-[#D4D4D4]" />
+                                )}
+                              </button>
+                              <h3
+                                className={`break-words text-left flex-1 ${
+                                  task.isFinished
+                                    ? "text-white/30"
+                                    : "text-white"
+                                }`}
                               >
-                                <div className="flex items-start gap-2">
-                                  <span className="text-sm text-white/50 font-semibold">
-                                    {index + 1}.
-                                  </span>
-                                  <button onClick={() => handleTick(task._id)}>
-                                    {task.isFinished ? (
-                                      <CheckSquare className="w-5 h-5 cursor-not-allowed text-white bg-green-600 rounded" />
-                                    ) : (
-                                      <Square className="w-5 h-5 cursor-progress text-white hover:text-[#D4D4D4]" />
-                                    )}
-                                  </button>
-                                  <h3
-                                    className={`break-words text-left flex-1 ${
-                                      task.isFinished
-                                        ? "text-white/30"
-                                        : "text-white"
-                                    }`}
-                                  >
-                                    {task.Task}
-                                  </h3>
-                                </div>
-                                <div
-                                  className={`text-sm mt-2 ${
-                                    task.isFinished
-                                      ? "text-white/30"
-                                      : "text-white"
-                                  } text-right`}
-                                >
-                                  {task.Date} — {task.Time || "--:--"}
-                                </div>
-                                <div className="flex justify-end gap-3 mt-2">
-                                  <button
-                                    onClick={() => {
-                                      setShowModal(true);
-                                      setAction("Edit");
-                                      setTaskForEdit(task);
-                                      setTableNameInput(task.tableName || "");
-                                    }}
-                                    disabled={task.isFinished}
-                                    className={`${
-                                      task.isFinished
-                                        ? "cursor-not-allowed text-white/30"
-                                        : "text-white cursor-pointer hover:text-[#D4D4D4]"
-                                    }`}
-                                  >
-                                    <Edit3 size={18} />
-                                  </button>
-                                  <button
-                                    onClick={() => handleDelete(task._id)}
-                                    className="text-white cursor-pointer hover:text-[#D4D4D4]"
-                                  >
-                                    <Trash2 size={18} />
-                                  </button>
-                                </div>
-                              </div>
-                            ))
-                          )}
-                        </div>
+                                {task.Task}
+                              </h3>
+                            </div>
+                            <div
+                              className={`text-sm mt-2 ${
+                                task.isFinished ? "text-white/30" : "text-white"
+                              } text-right`}
+                            >
+                              {task.Date} — {task.Time || "--:--"}
+                            </div>
+                            <div className="flex justify-end gap-3 mt-2">
+                              <button
+                                onClick={() => {
+                                  setShowModal(true);
+                                  setAction("Edit");
+                                  setTaskForEdit(task);
+                                  setTableNameInput(task.tableName || "");
+                                }}
+                                disabled={task.isFinished}
+                                className={`${
+                                  task.isFinished
+                                    ? "cursor-not-allowed text-white/30"
+                                    : "text-white hover:text-[#D4D4D4]"
+                                }`}
+                              >
+                                <Edit3 size={18} />
+                              </button>
+                              <button
+                                onClick={() => handleDelete(task._id)}
+                                className="text-white hover:text-[#D4D4D4]"
+                              >
+                                <Trash2 size={18} />
+                              </button>
+                            </div>
+                          </div>
+                        ))}
                       </div>
-                    );
-                  })
-                )}
-
-                <div className="flex justify-center pt-4">
-                  <button
-                    onClick={() => {
-                      setShowModal(true);
-                      setAction("Add");
-                      setTableNameInput("");
-                    }}
-                    className="btn btn-circle bg-[#838383] text-[#191919]"
-                  >
-                    +
-                  </button>
-                </div>
-              </div>
+                    )}
+                  </div>
+                );
+              })
             )}
+
+            {/* Bottom Add Button */}
+            <div className="flex justify-center mt-6">
+              <button
+                onClick={() => {
+                  setShowModal(true);
+                  setAction("Add");
+                  setTableNameInput("");
+                }}
+                className="btn btn-circle bg-[#838383] text-[#191919]"
+              >
+                +
+              </button>
+            </div>
           </div>
         )}
       </div>
 
+      {/* Modal */}
       {showModal && (
-        <dialog className="modal modal-open">
-          <div className="modal-box bg-[#2F2F2F] text-[#D4D4D4]">
+        <dialog className="modal modal-open overflow-hidden">
+          <div className="modal-box max-h-[95vh] overflow-y-auto bg-[#2F2F2F] text-[#D4D4D4]">
             <h3 className="font-bold text-lg mb-4">
               {action === "Edit" ? "Edit Task" : "Add New Task"}
             </h3>
             <form onSubmit={handleSubmitTask} className="flex flex-col gap-3">
               <input
                 type="text"
-                placeholder="Task name"
                 name="task"
+                placeholder="Task name"
                 defaultValue={taskForEdit?.Task || ""}
                 className="input input-bordered bg-[#191919] border-[#838383] placeholder-[#838383] text-[#D4D4D4]"
                 required
@@ -527,12 +513,12 @@ const Main = () => {
               />
               <select
                 onChange={(e) => setTableNameInput(e.target.value)}
-                className="select select-bordered bg-[#191919] border-[#838383] text-[#D4D4D4]"
                 value={tableNameInput}
+                className="select select-bordered bg-[#191919] border-[#838383] text-[#D4D4D4]"
               >
                 <option value="">-- Select Board/Table --</option>
-                {uniqueTableNames.map((name, index) => (
-                  <option key={index} value={name}>
+                {uniqueTableNames.map((name, idx) => (
+                  <option key={idx} value={name}>
                     {name}
                   </option>
                 ))}
@@ -544,7 +530,6 @@ const Main = () => {
                 onChange={(e) => setTableNameInput(e.target.value)}
                 className="input input-bordered bg-[#191919] border-[#838383] text-[#D4D4D4] placeholder-[#838383]"
               />
-
               <div className="modal-action">
                 <button
                   type="submit"
