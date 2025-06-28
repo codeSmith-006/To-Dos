@@ -44,7 +44,9 @@ const Main = () => {
   useEffect(() => {
     const getTasks = async () => {
       try {
-        const response = await AxiosX.get("https://to-dos-server.vercel.app/tasks");
+        const response = await AxiosX.get(
+          "https://to-dos-server.vercel.app/tasks"
+        );
         setTasks(response?.data);
         setDataFetchLoading(false);
       } catch (error) {
@@ -167,10 +169,13 @@ const Main = () => {
       setTasks(updatedTask);
 
       try {
-        const response = await AxiosX.patch("https://to-dos-server.vercel.app/tasks", {
-          targetId: id,
-          action: "mark-finished",
-        });
+        const response = await AxiosX.patch(
+          "https://to-dos-server.vercel.app/tasks",
+          {
+            targetId: id,
+            action: "mark-finished",
+          }
+        );
       } catch (error) {
         console.log("Error while patching in the database: ", error);
       }
@@ -193,7 +198,7 @@ const Main = () => {
               className={`pb-1 border-b-2 cursor-pointer ${
                 isTableView ? "border-[#838383]" : "border-transparent"
               }`}
-              onClick={() => handleViewChange('table')}
+              onClick={() => handleViewChange("table")}
             >
               Task
             </button>
@@ -201,7 +206,7 @@ const Main = () => {
               className={`pb-1 border-b-2 cursor-pointer ${
                 !isTableView ? "border-[#838383]" : "border-transparent"
               }`}
-              onClick={() => handleViewChange('board')}
+              onClick={() => handleViewChange("board")}
             >
               Board
             </button>
@@ -339,34 +344,38 @@ const Main = () => {
                                     )}
                                   </button>
                                 </td>
-                                <td className="max-w-sm break-words pt-3">
+                                <td className="max-w-sm break-words pt-3 align-top">
                                   {task.Task}
                                 </td>
-                                <td className="pt-3">{task.Date}</td>
-                                <td className="pt-3">{task.Time || "--:--"}</td>
-                                <td className="flex gap-3 pt-2">
-                                  <button
-                                    onClick={() => {
-                                      setShowModal(true);
-                                      setAction("Edit");
-                                      setTaskForEdit(task);
-                                      setTableNameInput(task.tableName || "");
-                                    }}
-                                    disabled={task.isFinished}
-                                    className={`${
-                                      task.isFinished
-                                        ? "text-white/30 cursor-not-allowed"
-                                        : "text-white cursor-pointer hover:text-[#D4D4D4]"
-                                    }`}
-                                  >
-                                    <Edit3 className="w-4 h-4" />
-                                  </button>
-                                  <button
-                                    onClick={() => handleDelete(task._id)}
-                                    className="text-white cursor-pointer hover:text-[#D4D4D4]"
-                                  >
-                                    <Trash2 className="w-4 h-4" />
-                                  </button>
+                                <td className="pt-3 align-top">{task.Date}</td>
+                                <td className="pt-3 align-top">
+                                  {task.Time || "--:--"}
+                                </td>
+                                <td className="pt-3 align-top">
+                                  <div className="flex items-start gap-3">
+                                    <button
+                                      onClick={() => {
+                                        setShowModal(true);
+                                        setAction("Edit");
+                                        setTaskForEdit(task);
+                                        setTableNameInput(task.tableName || "");
+                                      }}
+                                      disabled={task.isFinished}
+                                      className={`${
+                                        task.isFinished
+                                          ? "text-white/30 cursor-not-allowed"
+                                          : "text-white cursor-pointer hover:text-[#D4D4D4]"
+                                      }`}
+                                    >
+                                      <Edit3 className="w-4 h-4" />
+                                    </button>
+                                    <button
+                                      onClick={() => handleDelete(task._id)}
+                                      className="text-white cursor-pointer hover:text-[#D4D4D4]"
+                                    >
+                                      <Trash2 className="w-4 h-4" />
+                                    </button>
+                                  </div>
                                 </td>
                               </tr>
                             ))}

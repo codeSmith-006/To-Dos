@@ -1,25 +1,44 @@
-import React from "react";
-import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import React, { useContext, useEffect } from "react";
+import {
+  browserLocalPersistence,
+  GoogleAuthProvider,
+  setPersistence,
+  signInWithPopup,
+} from "firebase/auth";
 import { auth } from "../../Firebase/firebase.config";
 import { Typewriter } from "react-simple-typewriter";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+import AuthContext from "../../Context/AuthContext";
+import Loading from "../../Component/Loading/Loading";
 
 const Login = () => {
-    // navigate to home
-    const navigate = useNavigate();
+  const navigate = useNavigate();
+  const { currentUser, loading } = useContext(AuthContext);
+
+  // 🔁 Prevent showing login page if already logged in
+  useEffect(() => {
+    if (!loading && currentUser) {
+      navigate("/");
+    }
+  }, [currentUser, loading, navigate]);
+
   const handleGoogleSignIn = async () => {
     const provider = new GoogleAuthProvider();
+
     try {
+      await setPersistence(auth, browserLocalPersistence);
       await signInWithPopup(auth, provider);
+
       toast.success("Login successful!");
-      // navigating to home if successfully logged in
-      navigate("/")
+      navigate("/");
     } catch (error) {
       console.error("Google Sign-In Error:", error);
-      toast.error("Login failed. Try again.");
+      toast.error("Login failed. Please try again.");
     }
   };
+
+  if (loading) return <Loading />;
 
   return (
     <div className="min-h-screen bg-[#191919] text-[#D4D4D4] flex flex-col justify-center items-center px-4">

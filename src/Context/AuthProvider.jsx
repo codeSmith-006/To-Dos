@@ -10,25 +10,30 @@ const AuthProvider = ({ children }) => {
 
   // getting current user
 useEffect(() => {
-  const unSubscribe = onAuthStateChanged(auth, async (user) => {
-    if (user) {
-      try {
+  const unsubscribe = onAuthStateChanged(auth, async (user) => {
+    try {
+      if (user) {
         setCurrentUser(user);
+
+        // Fetch and store ID token
         const token = await user.getIdToken();
-        getToken(token || null);
-      } catch (err) {
-        console.error("Error fetching token:", err);
+        getToken(token); // token is never null if user exists
+      } else {
+        setCurrentUser(null);
         getToken(null);
       }
-    } else {
+    } catch (error) {
+      console.error("Error during auth state change:", error);
       setCurrentUser(null);
       getToken(null);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   });
 
-  return () => unSubscribe();
+  return () => unsubscribe();
 }, []);
+
 
 
   // logout

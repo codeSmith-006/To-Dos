@@ -1,6 +1,6 @@
 import React, { use } from "react";
 import AuthContext from "../../Context/AuthContext";
-import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { browserLocalPersistence, GoogleAuthProvider, setPersistence, signInWithPopup } from "firebase/auth";
 import { auth } from "../../Firebase/firebase.config";
 import Loading from "../Loading/Loading";
 import Tooltip from "@mui/material/Tooltip";
@@ -16,14 +16,16 @@ const Navbar = () => {
   // full name
   const fullName = currentUser?.displayName || "User";
 
-  const handleGoogleSignIn = async () => {
-    const provider = new GoogleAuthProvider();
-    try {
-      await signInWithPopup(auth, provider);
-    } catch (error) {
-      console.log("Error while signing in with Google: ", error);
-    }
-  };
+const handleGoogleSignIn = async () => {
+  const provider = new GoogleAuthProvider();
+
+  try {
+    await setPersistence(auth, browserLocalPersistence); // 👈 Ensures session persists across tabs/reloads
+    await signInWithPopup(auth, provider);
+  } catch (error) {
+    console.log("Error while signing in with Google: ", error);
+  }
+};
 
 const handleLogOut = async () => {
   try {
